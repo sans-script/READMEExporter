@@ -120,7 +120,7 @@
   top: 0;
   left: -10000px;
   box-sizing: border-box;
-  width: 900px;
+  width: 794px; /* A4 width at 96dpi; the PDF page is sized to match */
   padding: 32px;
   background: var(--bgColor-default, #ffffff);
   color: var(--fgColor-default, #1f2328);
@@ -128,8 +128,8 @@
 
 #readme-exporter-resume .rx-header {
   display: grid;
-  grid-template-columns: 112px 1fr minmax(220px, 34%);
-  gap: 24px;
+  grid-template-columns: 112px 1fr;
+  gap: 16px 24px;
   align-items: center;
   padding-bottom: 20px;
   border-bottom: 1px solid var(--borderColor-default, #d1d9e0);
@@ -143,8 +143,24 @@
 }
 
 #readme-exporter-resume .rx-identity .user-profile-bio { margin: 8px 0 !important; }
-#readme-exporter-resume .rx-contact .vcard-details { margin: 0; padding: 0; }
-#readme-exporter-resume .rx-contact .vcard-detail { padding-top: 2px !important; font-size: 12px; }
+/* Contact links fill as many columns as fit, so few links stay on one row. */
+#readme-exporter-resume .rx-contact { grid-column: 1 / -1; }
+#readme-exporter-resume .rx-contact .vcard-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 6px 16px;
+  margin: 0;
+  padding: 0;
+}
+#readme-exporter-resume .rx-contact .vcard-detail {
+  min-width: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
 
 #readme-exporter-resume .rx-section { margin-top: 24px; }
 #readme-exporter-resume .rx-section-title {
@@ -158,6 +174,11 @@
   color: var(--fgColor-muted, #59636e);
 }
 
+#readme-exporter-resume .rx-readme-box {
+  padding: 24px;
+  border: 1px solid var(--borderColor-default, #d1d9e0);
+  border-radius: 6px;
+}
 #readme-exporter-resume article.markdown-body { max-width: none !important; padding: 0 !important; }
 
 #readme-exporter-resume .rx-pinned {
@@ -188,11 +209,7 @@
     print-color-adjust: exact !important;
   }
 
-  body.readme-exporter-printing #readme-exporter-resume {
-    position: static;
-    width: 100%;
-    padding: 0;
-  }
+  body.readme-exporter-printing #readme-exporter-resume { position: static; }
 
   #readme-exporter-resume a { text-decoration: none; }
 }

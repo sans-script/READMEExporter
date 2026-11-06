@@ -25,7 +25,8 @@ export function isProfilePage(): boolean {
 }
 
 export function getResumeTitle(): string {
-  const login = document.querySelector(".vcard-username")?.textContent?.trim() || "github";
+  // .vcard-username also holds pronouns ("login · he/him"); the URL has only the login.
+  const login = location.pathname.split("/")[1] || "github";
   return login.replace(/[^a-z0-9._-]+/gi, "-") + "-resume";
 }
 
@@ -112,9 +113,16 @@ export function buildResume(): HTMLElement {
   const resume = document.createElement("div");
   resume.id = RESUME_ID;
 
-  const readme = clone(".profile-readme article.markdown-body");
+  // Visitors see .profile-readme; the profile owner gets a different wrapper.
+  const readme = clone(".profile-readme article.markdown-body, #user-profile-frame article.markdown-body");
+  let readmeBox: HTMLElement | null = null;
+  if (readme) {
+    readmeBox = document.createElement("div");
+    readmeBox.className = "rx-readme-box";
+    readmeBox.append(readme);
+  }
   resume.append(
-    ...[buildHeader(), section("About", readme), buildPinned(), buildSidebarExtras()]
+    ...[buildHeader(), section("About", readmeBox), buildPinned(), buildSidebarExtras()]
       .filter((node): node is HTMLElement => node !== null),
   );
 
@@ -128,6 +136,16 @@ export function buildResume(): HTMLElement {
 
   document.body.append(resume);
   return resume;
+}
+
+// Sizes the print page to the resume so the PDF is one continuous page.
+// Returns a cleanup that restores the default page size.
+export function fitToSinglePage(resume: HTMLElement): () => void {
+  const style = document.createElement("style");
+  const height = Math.ceil(resume.getBoundingClientRect().height) + 2;
+  style.textContent = "@page { size: " + resume.offsetWidth + "px " + height + "px; margin: 0; }";
+  document.head.append(style);
+  return () => style.remove();
 }
 
 export function waitForImages(root: HTMLElement, timeoutMs = 4000): Promise<void> {

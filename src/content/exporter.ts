@@ -1,5 +1,5 @@
 import { findReadme, getReadmeTitle } from "./detector";
-import { buildResume, getResumeTitle, isProfilePage, waitForImages } from "./resume";
+import { buildResume, fitToSinglePage, getResumeTitle, isProfilePage, waitForImages } from "./resume";
 
 let printing = false;
 
@@ -17,10 +17,12 @@ export async function exportReadme(): Promise<void> {
   const previousTitle = document.title;
   const exportTitle = readme ? getReadmeTitle(readme) : getResumeTitle();
 
+  let resetPage = () => {};
   if (profile) {
     const resume = buildResume();
     document.body.classList.add("readme-exporter-printing");
     await waitForImages(resume);
+    resetPage = fitToSinglePage(resume);
   }
 
   document.title = exportTitle;
@@ -29,6 +31,7 @@ export async function exportReadme(): Promise<void> {
     document.title = previousTitle;
     document.body.classList.remove("readme-exporter-printing");
     document.getElementById("readme-exporter-resume")?.remove();
+    resetPage();
     printing = false;
     window.removeEventListener("afterprint", restore);
   };
