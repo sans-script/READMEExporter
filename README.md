@@ -15,7 +15,7 @@ A Chrome Manifest V3 extension that exports GitHub repository READMEs and profil
 ### From a GitHub release
 
 1. Open the [Releases page](https://github.com/sans-script/READMEExporter/releases).
-2. Download the latest `READMEExporter-vX.Y.Z.zip` asset.
+2. Download the ZIP asset attached to the latest release.
 3. Extract the ZIP file into a folder.
 4. Open `chrome://extensions` in Chrome.
 5. Enable **Developer mode**.
