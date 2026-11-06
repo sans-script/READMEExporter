@@ -23,11 +23,14 @@
   }
 
   #readme,
-  #readme * {
+  #readme *,
+  .profile-readme article.markdown-body,
+  .profile-readme article.markdown-body * {
     visibility: visible !important;
   }
 
-  #readme {
+  #readme,
+  .profile-readme article.markdown-body {
     position: absolute !important;
     inset: 0 auto auto 0 !important;
     display: block !important;
@@ -46,53 +49,67 @@
   }
 
   #readme,
-  #readme * {
+  #readme *,
+  .profile-readme article.markdown-body,
+  .profile-readme article.markdown-body * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
   #readme img,
   #readme video,
-  #readme svg {
+  #readme svg,
+  .profile-readme article.markdown-body img,
+  .profile-readme article.markdown-body video,
+  .profile-readme article.markdown-body svg {
     max-width: 100% !important;
     break-inside: avoid;
   }
 
   #readme pre,
   #readme table,
-  #readme blockquote {
+  #readme blockquote,
+  .profile-readme article.markdown-body pre,
+  .profile-readme article.markdown-body table,
+  .profile-readme article.markdown-body blockquote {
     break-inside: avoid-page;
   }
 
-  #readme pre {
+  #readme pre,
+  .profile-readme article.markdown-body pre {
     white-space: pre-wrap !important;
     overflow-wrap: anywhere !important;
   }
 
-  #readme table {
+  #readme table,
+  .profile-readme article.markdown-body table {
     max-width: 100% !important;
     border-collapse: collapse !important;
   }
 
-  #readme a {
+  #readme a,
+  .profile-readme article.markdown-body a {
     color: inherit !important;
     text-decoration: underline;
   }
 
-  #readme .markdown-body {
+  #readme .markdown-body,
+  .profile-readme article.markdown-body {
     max-width: none !important;
     overflow: visible !important;
   }
 
   #readme .Box-header,
   #readme .Box-body,
-  #readme .markdown-body {
+  #readme .markdown-body,
+  .profile-readme article.markdown-body {
     break-inside: auto;
   }
 
   #readme [style*="position: sticky"],
   #readme .flash,
-  #readme .js-comment-edit-button {
+  #readme .js-comment-edit-button,
+  .profile-readme article.markdown-body [style*="position: sticky"] {
     position: static !important;
   }
 }

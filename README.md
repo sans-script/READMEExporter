@@ -39,11 +39,15 @@ Every pushed tag matching `v*` triggers the GitHub Actions release workflow. It 
 To publish a new version:
 
 ```bash
-git tag v0.1.1
-git push origin v0.1.1
+git tag v0.1.2
+git push origin v0.1.2
 ```
 
 After the workflow completes, the ZIP will be available on the [Releases page](https://github.com/sans-script/READMEExporter/releases).
+
+## Example export
+
+[Download the exported GitHub profile README as PDF](artifacts/alexandre-santos-github-profile.pdf). This sample was rendered from the maintainer's public GitHub profile on 2026-11-06.
 
 ## HTML export notes
 
