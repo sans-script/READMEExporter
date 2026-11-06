@@ -1,10 +1,11 @@
 # README Exporter
 
-A Chrome Manifest V3 extension that exports GitHub's already-rendered README to PDF or HTML.
+A Chrome Manifest V3 extension that exports GitHub repository READMEs and profile READMEs to PDF or HTML.
 
 ## Features
 
 - Export PDF through Chrome's native print dialog.
+- Detect README content on repository pages and GitHub profile pages.
 - Export a standalone HTML document with computed styles copied from the rendered GitHub DOM.
 - Preserve the README container, border, header, typography, colors, tables, code blocks, and image references.
 - Keep links as absolute URLs.

@@ -1,8 +1,8 @@
 {
   "name": "readme-exporter",
   "private": true,
-  "version": "0.1.0",
-  "description": "Export GitHub-rendered README pages to PDF using native Chrome printing.",
+  "version": "0.1.1",
+  "description": "Export GitHub repository and profile READMEs to PDF or HTML.",
   "type": "module",
   "scripts": {
     "dev": "vite",

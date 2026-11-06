@@ -2,13 +2,16 @@ const README_SELECTOR = "#readme";
 
 export function findReadme(): HTMLElement | null {
   const candidate = document.querySelector<HTMLElement>(README_SELECTOR);
-  if (!candidate || !candidate.isConnected) return null;
+  if (candidate?.isConnected) {
+    const renderedSelector = ".markdown-body, article, [data-testid='readme']";
+    const hasRenderedContent =
+      candidate.matches(renderedSelector) || candidate.querySelector(renderedSelector);
+    if (hasRenderedContent) return candidate;
+  }
 
-  const renderedSelector = ".markdown-body, article, [data-testid='readme']";
-  const hasRenderedContent =
-    candidate.matches(renderedSelector) || candidate.querySelector(renderedSelector);
-
-  return hasRenderedContent ? candidate : null;
+  // GitHub profile READMEs use a different DOM structure from repository READMEs.
+  // The profile page renders the README as an article inside .profile-readme.
+  return document.querySelector<HTMLElement>(".profile-readme article.markdown-body");
 }
 
 export function getReadmeTitle(readme: HTMLElement): string {
