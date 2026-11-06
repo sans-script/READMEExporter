@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "README Exporter",
   "description": "Export GitHub repository and profile READMEs to visually faithful PDF or HTML files.",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "permissions": [],
   "host_permissions": [
     "https://github.com/*"
