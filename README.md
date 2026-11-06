@@ -9,7 +9,18 @@ A Chrome Manifest V3 extension that exports GitHub's already-rendered README to 
 - Preserve the README container, border, header, typography, colors, tables, code blocks, and image references.
 - Keep links as absolute URLs.
 
-## Development
+## Install in Chrome
+
+### From a GitHub release
+
+1. Open the [Releases page](https://github.com/sans-script/OhMyREADME.md/releases).
+2. Download the latest `OhMyREADME-vX.Y.Z.zip` asset.
+3. Extract the ZIP file into a folder.
+4. Open `chrome://extensions` in Chrome.
+5. Enable **Developer mode**.
+6. Select **Load unpacked** and choose the extracted folder.
+
+### Build from source
 
 Requirements: Node.js 20+ and npm.
 
@@ -18,14 +29,20 @@ npm install
 npm run build
 ```
 
-Load the unpacked extension from the generated `dist/` directory:
+Then load the generated `dist/` directory through `chrome://extensions` → **Developer mode** → **Load unpacked**.
 
-1. Open `chrome://extensions`.
-2. Enable Developer mode.
-3. Select **Load unpacked**.
-4. Choose this project's `dist/` directory.
-5. Open a GitHub repository page containing a rendered README.
-6. Use **Export PDF** or **Export HTML** in the README header or extension popup.
+## Releases
+
+Every pushed tag matching `v*` triggers the GitHub Actions release workflow. It builds the extension and attaches a ZIP containing the contents of `dist/` to a GitHub Release.
+
+To publish a new version:
+
+```bash
+git tag v0.1.1
+git push origin v0.1.1
+```
+
+After the workflow completes, the ZIP will be available on the [Releases page](https://github.com/sans-script/OhMyREADME.md/releases).
 
 ## HTML export notes
 
