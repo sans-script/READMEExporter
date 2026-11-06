@@ -120,37 +120,33 @@
   top: 0;
   left: -10000px;
   box-sizing: border-box;
-  width: 794px; /* A4 width at 96dpi; the PDF page is sized to match */
-  padding: 32px;
+  width: 794px; /* A4 width at 96dpi; widened and zoomed to fit one page when printing */
+  padding: 32px 40px;
   background: var(--bgColor-default, #ffffff);
   color: var(--fgColor-default, #1f2328);
 }
 
+/* Avatar | name and bio | contact links, which take as many columns as fit. */
 #readme-exporter-resume .rx-header {
   display: grid;
-  grid-template-columns: 112px 1fr;
-  gap: 16px 24px;
+  grid-template-columns: 96px minmax(200px, auto) 1fr;
+  gap: 24px;
   align-items: center;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--borderColor-default, #d1d9e0);
 }
-
 #readme-exporter-resume .rx-avatar {
-  width: 112px;
-  height: 112px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
   box-shadow: 0 0 0 1px var(--borderColor-default, #d1d9e0);
 }
-
-#readme-exporter-resume .rx-identity .user-profile-bio { margin: 8px 0 !important; }
-/* Contact links fill as many columns as fit, so few links stay on one row. */
-#readme-exporter-resume .rx-contact { grid-column: 1 / -1; }
+#readme-exporter-resume .rx-identity .user-profile-bio { margin: 6px 0 !important; }
 #readme-exporter-resume .rx-contact .vcard-details {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 6px 16px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 6px 20px;
   margin: 0;
-  padding: 0;
+  padding: 0 0 0 24px;
+  border-left: 1px solid var(--borderColor-muted, #d1d9e0b3);
 }
 #readme-exporter-resume .rx-contact .vcard-detail {
   min-width: 0;
@@ -162,28 +158,32 @@
   text-overflow: ellipsis;
 }
 
-#readme-exporter-resume .rx-section { margin-top: 24px; }
-#readme-exporter-resume .rx-section-title {
-  margin: 0 0 12px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--borderColor-muted, #d1d9e0b3);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--fgColor-muted, #59636e);
+#readme-exporter-resume .rx-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 20px;
+  margin-top: 20px;
 }
+#readme-exporter-resume .rx-main { flex: 1 1 860px; min-width: 0; }
+#readme-exporter-resume .rx-side { flex: 1 1 340px; min-width: 0; }
+#readme-exporter-resume .rx-side .rx-section + .rx-section { margin-top: 20px; }
 
 #readme-exporter-resume .rx-readme-box {
-  padding: 24px;
+  padding: 24px 32px;
   border: 1px solid var(--borderColor-default, #d1d9e0);
   border-radius: 6px;
 }
-#readme-exporter-resume article.markdown-body { max-width: none !important; padding: 0 !important; }
+/* Keep README content at GitHub's reading width, centered in the box. */
+#readme-exporter-resume article.markdown-body {
+  max-width: 880px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+}
 
 #readme-exporter-resume .rx-pinned {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 12px;
   margin: 0;
   padding: 0;
@@ -196,8 +196,8 @@
   break-inside: avoid;
 }
 
-#readme-exporter-resume .rx-extras { display: flex; flex-wrap: wrap; gap: 32px; }
-#readme-exporter-resume .rx-extra { margin: 0 !important; padding: 0 !important; border: 0 !important; break-inside: avoid; }
+#readme-exporter-resume .rx-extras { display: flex; flex-wrap: wrap; gap: 16px 40px; }
+#readme-exporter-resume .rx-extra { margin: 0 !important; padding: 0 !important; border: 0 !important; }
 
 @media print {
   body.readme-exporter-printing > *:not(#readme-exporter-resume) { display: none !important; }
@@ -209,7 +209,11 @@
     print-color-adjust: exact !important;
   }
 
-  body.readme-exporter-printing #readme-exporter-resume { position: static; }
+  body.readme-exporter-printing #readme-exporter-resume {
+    position: static;
+    margin: 0 auto;
+    break-inside: avoid;
+  }
 
   #readme-exporter-resume a { text-decoration: none; }
 }
