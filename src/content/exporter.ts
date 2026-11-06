@@ -1,6 +1,6 @@
 import { findReadme, getReadmeTitle } from "./detector";
 import { buildResume, defaultPaper, fitToPage, getResumeTitle, isProfilePage, waitForImages } from "./resume";
-import type { PrintToPdfResponse } from "../shared/types";
+import type { ExtensionMessage, PdfResponse } from "../shared/types";
 
 let printing = false;
 
@@ -16,24 +16,37 @@ function downloadPdf(base64: string, filename: string): void {
 
 // Profile pages: build the resume, fit it to one page and render it to PDF
 // in the background worker (no print dialog).
+async function pdfStep(message: ExtensionMessage): Promise<string | undefined> {
+  const response = (await chrome.runtime.sendMessage(message)) as PdfResponse;
+  if (!response.ok) throw new Error(response.error);
+  return response.data;
+}
+
 export async function exportProfilePdf(readmeOnly = false): Promise<void> {
   if (printing) return;
   printing = true;
 
   const resume = buildResume(readmeOnly);
   document.body.classList.add("readme-exporter-printing");
-  let resetPage = () => {};
+  // print.css sets "@page { size: A4; margin: 8mm }" for README printing.
+  // Chrome lays out at the CSS page size and then shrinks it onto the paper,
+  // so the page box must match the paper exactly, with no margins.
+  const paper = defaultPaper();
+  const pageStyle = document.createElement("style");
+  pageStyle.textContent = "@page { size: " + paper.width + "in " + paper.height + "in !important; margin: 0 !important; }";
+  document.head.append(pageStyle);
   try {
     await waitForImages(resume);
-    const paper = defaultPaper();
-    resetPage = fitToPage(resume, paper);
-    const response = (await chrome.runtime.sendMessage({ type: "PRINT_TAB_TO_PDF", paper })) as PrintToPdfResponse;
-    if ("error" in response) throw new Error(response.error);
-    downloadPdf(response.data, getResumeTitle(readmeOnly) + ".pdf");
+    await pdfStep({ type: "PDF_BEGIN" });
+    const scale = fitToPage(resume, paper); // measured while print media is emulated
+    const data = await pdfStep({ type: "PDF_PRINT", paper, scale });
+    if (!data) throw new Error("The PDF renderer returned no data.");
+    downloadPdf(data, getResumeTitle(readmeOnly) + ".pdf");
   } catch (error) {
     window.alert("PDF export failed: " + (error instanceof Error ? error.message : String(error)));
   } finally {
-    resetPage();
+    await pdfStep({ type: "PDF_END" }).catch(() => undefined);
+    pageStyle.remove();
     document.body.classList.remove("readme-exporter-printing");
     resume.remove();
     printing = false;

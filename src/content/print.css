@@ -185,10 +185,10 @@
   border: 1px solid var(--borderColor-default, #d1d9e0);
   border-radius: 6px;
 }
-/* Keep README content at GitHub's reading width, centered in the box. */
 #readme-exporter-resume article.markdown-body {
-  max-width: 880px !important;
-  margin: 0 auto !important;
+  font-size: 18px !important; /* stays readable after the page is scaled down */
+  max-width: none !important;
+  margin: 0 !important;
   padding: 0 !important;
 }
 
@@ -200,6 +200,10 @@
   padding: 0;
   list-style: none;
 }
+#readme-exporter-resume .rx-pinned .pinned-item-list-item .repo { font-size: 18px; }
+#readme-exporter-resume .rx-pinned .pinned-item-list-item .pinned-item-desc { font-size: 15px !important; }
+#readme-exporter-resume .rx-pinned .pinned-item-list-item p:last-child { font-size: 14px !important; }
+#readme-exporter-resume .rx-extra h2 { font-size: 18px !important; }
 #readme-exporter-resume .rx-pinned .pinned-item-list-item {
   width: auto !important;
   max-width: none !important;
@@ -212,10 +216,10 @@
 
 /* README-only export: the bordered README box spans the whole sheet. */
 #readme-exporter-resume.rx-readme-only .rx-body { margin-top: 0; }
-#readme-exporter-resume.rx-readme-only article.markdown-body { max-width: none !important; }
 
 @media print {
   body.readme-exporter-printing > *:not(#readme-exporter-resume) { display: none !important; }
+  @page { margin: 0; }
 
   body.readme-exporter-printing #readme-exporter-resume,
   body.readme-exporter-printing #readme-exporter-resume * {
@@ -225,7 +229,13 @@
   }
 
   body.readme-exporter-printing #readme-exporter-resume {
-    position: static;
+    /* Any descendant wider than the resume would make Chrome shrink the whole
+       page to fit; clip so the computed scale is exactly what prints.
+       relative makes this the containing block, so absolutely positioned
+       descendants (GitHub tooltips, sr-only text) are clipped too. */
+    overflow: clip;
+    position: relative;
+    left: 0;
     margin: 0 auto;
     break-inside: avoid;
   }

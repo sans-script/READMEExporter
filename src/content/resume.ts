@@ -160,26 +160,24 @@ export function defaultPaper(): Paper {
 }
 
 // Widens the layout until its aspect ratio matches the paper (content reflows
-// into the side column and gets shorter), then zooms it down so the whole
-// resume fills exactly one page. Returns a cleanup that restores the page.
-export function fitToPage(resume: HTMLElement, paper: Paper): () => void {
+// into the side column and gets shorter) and returns the print scale that
+// makes the whole resume fill exactly one page.
+export function fitToPage(resume: HTMLElement, paper: Paper): number {
   const pageWidth = paper.width * 96;
   const pageHeight = paper.height * 96 - 2; // keep clear of rounding into a 2nd page
   const maxWidth = pageWidth * 2.5;
 
+  // Measure the rendered box: content with a min-content width can make the
+  // resume wider than the width we ask for.
+  const tooTall = () => resume.offsetHeight * (pageWidth / resume.offsetWidth) > pageHeight;
   let width = pageWidth;
   resume.style.width = width + "px";
-  while (resume.offsetHeight * (pageWidth / width) > pageHeight && width < maxWidth) {
+  while (tooTall() && width < maxWidth) {
     width += 20;
     resume.style.width = width + "px";
   }
   // ponytail: if even maxWidth is too tall, shrink further and leave side margins.
-  const zoom = Math.min(pageWidth / width, pageHeight / resume.offsetHeight);
-
-  const style = document.createElement("style");
-  style.textContent = "@page { margin: 0; } @media print { #" + RESUME_ID + " { zoom: " + zoom.toFixed(4) + "; } }";
-  document.head.append(style);
-  return () => style.remove();
+  return Math.min(pageWidth / resume.offsetWidth, pageHeight / resume.offsetHeight);
 }
 
 export function waitForImages(root: HTMLElement, timeoutMs = 4000): Promise<void> {
