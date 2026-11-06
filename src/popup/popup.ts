@@ -16,7 +16,9 @@ async function initialize(): Promise<void> {
   try {
     const response = await chrome.tabs.sendMessage(tab.id, { type: "README_EXPORT_STATUS" });
     if (response?.available) {
-      status.textContent = "A rendered README was found on this page.";
+      status.textContent = response.profile
+        ? "GitHub profile found. It will be exported as a resume."
+        : "A rendered README was found on this page.";
       pdfButton.disabled = false;
       htmlButton.disabled = false;
     } else {

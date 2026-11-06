@@ -1,4 +1,5 @@
 import { findReadme, getReadmeTitle } from "./detector";
+import { buildResume, getResumeTitle, isProfilePage } from "./resume";
 
 const EXPORT_UI_SELECTOR = "#readme-exporter-controls";
 
@@ -74,13 +75,25 @@ function normalizeResourceAttributes(root: Element): void {
 }
 
 export function exportReadmeAsHtml(): void {
+  if (isProfilePage()) {
+    const resume = buildResume();
+    try {
+      exportElementAsHtml(resume, getResumeTitle());
+    } finally {
+      resume.remove();
+    }
+    return;
+  }
+
   const readme = findReadme();
   if (!readme) {
     window.alert("No rendered GitHub README was found on this page.");
     return;
   }
+  exportElementAsHtml(readme, getReadmeTitle(readme));
+}
 
-  const title = getReadmeTitle(readme);
+function exportElementAsHtml(readme: HTMLElement, title: string): void {
   const clone = readme.cloneNode(true) as HTMLElement;
   const sourceElements = [readme, ...Array.from(readme.querySelectorAll("*"))];
   const cloneElements = [clone, ...Array.from(clone.querySelectorAll("*"))];
@@ -90,6 +103,9 @@ export function exportReadmeAsHtml(): void {
     const target = cloneElements[index];
     if (target) copyComputedStyles(source, target, pseudoRules, index);
   });
+
+  // The resume is measured off-screen; undo that placement in the exported copy.
+  for (const property of ["position", "left", "top"]) clone.style.removeProperty(property);
 
   clone.querySelectorAll(EXPORT_UI_SELECTOR).forEach((controls) => controls.remove());
   normalizeResourceAttributes(clone);

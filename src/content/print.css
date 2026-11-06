@@ -113,3 +113,86 @@
     position: static !important;
   }
 }
+
+/* ---- Profile resume layout ---- */
+#readme-exporter-resume {
+  position: absolute;
+  top: 0;
+  left: -10000px;
+  box-sizing: border-box;
+  width: 900px;
+  padding: 32px;
+  background: var(--bgColor-default, #ffffff);
+  color: var(--fgColor-default, #1f2328);
+}
+
+#readme-exporter-resume .rx-header {
+  display: grid;
+  grid-template-columns: 112px 1fr minmax(220px, 34%);
+  gap: 24px;
+  align-items: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--borderColor-default, #d1d9e0);
+}
+
+#readme-exporter-resume .rx-avatar {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--borderColor-default, #d1d9e0);
+}
+
+#readme-exporter-resume .rx-identity .user-profile-bio { margin: 8px 0 !important; }
+#readme-exporter-resume .rx-contact .vcard-details { margin: 0; padding: 0; }
+#readme-exporter-resume .rx-contact .vcard-detail { padding-top: 2px !important; font-size: 12px; }
+
+#readme-exporter-resume .rx-section { margin-top: 24px; }
+#readme-exporter-resume .rx-section-title {
+  margin: 0 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--borderColor-muted, #d1d9e0b3);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fgColor-muted, #59636e);
+}
+
+#readme-exporter-resume article.markdown-body { max-width: none !important; padding: 0 !important; }
+
+#readme-exporter-resume .rx-pinned {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+#readme-exporter-resume .rx-pinned .pinned-item-list-item {
+  width: auto !important;
+  max-width: none !important;
+  margin: 0 !important;
+  break-inside: avoid;
+}
+
+#readme-exporter-resume .rx-extras { display: flex; flex-wrap: wrap; gap: 32px; }
+#readme-exporter-resume .rx-extra { margin: 0 !important; padding: 0 !important; border: 0 !important; break-inside: avoid; }
+
+@media print {
+  body.readme-exporter-printing > *:not(#readme-exporter-resume) { display: none !important; }
+
+  body.readme-exporter-printing #readme-exporter-resume,
+  body.readme-exporter-printing #readme-exporter-resume * {
+    visibility: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body.readme-exporter-printing #readme-exporter-resume {
+    position: static;
+    width: 100%;
+    padding: 0;
+  }
+
+  #readme-exporter-resume a { text-decoration: none; }
+}

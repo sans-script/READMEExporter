@@ -1,24 +1,34 @@
 import { findReadme, getReadmeTitle } from "./detector";
+import { buildResume, getResumeTitle, isProfilePage, waitForImages } from "./resume";
 
 let printing = false;
 
-export function exportReadme(): void {
+export async function exportReadme(): Promise<void> {
   if (printing) return;
 
-  const readme = findReadme();
-  if (!readme) {
+  const profile = isProfilePage();
+  const readme = profile ? null : findReadme();
+  if (!profile && !readme) {
     window.alert("No rendered GitHub README was found on this page.");
     return;
   }
 
   printing = true;
   const previousTitle = document.title;
-  const exportTitle = getReadmeTitle(readme);
+  const exportTitle = readme ? getReadmeTitle(readme) : getResumeTitle();
+
+  if (profile) {
+    const resume = buildResume();
+    document.body.classList.add("readme-exporter-printing");
+    await waitForImages(resume);
+  }
 
   document.title = exportTitle;
 
   const restore = () => {
     document.title = previousTitle;
+    document.body.classList.remove("readme-exporter-printing");
+    document.getElementById("readme-exporter-resume")?.remove();
     printing = false;
     window.removeEventListener("afterprint", restore);
   };
