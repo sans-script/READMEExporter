@@ -48,8 +48,11 @@ async function exportPdf(job: PdfJob): Promise<void> {
   // Chrome lays out at the CSS @page size, so it must match the paper exactly.
   const paper = defaultPaper();
   const pageStyle = document.createElement("style");
+  // Chrome leaves @page margins unpainted; give them the page's own background
+  // so a dark theme has no visible frame around the content.
+  const background = getComputedStyle(doc).backgroundColor;
   pageStyle.textContent = "@page { size: " + paper.width + "in " + paper.height + "in !important; margin: " +
-    job.marginIn + "in !important; }";
+    job.marginIn + "in !important; background: " + background + " !important; }";
   document.head.append(pageStyle);
   try {
     await waitForImages(doc);
