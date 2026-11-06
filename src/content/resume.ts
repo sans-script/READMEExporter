@@ -1,3 +1,5 @@
+import type { Paper } from "../shared/types";
+
 // Builds a resume-style document from a GitHub profile page by cloning the
 // rendered nodes (keeping GitHub's classes, icons and fonts) into a new skeleton.
 
@@ -24,9 +26,10 @@ export function isProfilePage(): boolean {
   return Boolean(document.querySelector(".js-profile-editable-area .vcard-details, .vcard-names"));
 }
 
-export function getResumeTitle(): string {
-  const login = document.querySelector(".vcard-username")?.textContent?.trim() || "github";
-  return login.replace(/[^a-z0-9._-]+/gi, "-") + "-resume";
+export function getResumeTitle(readmeOnly = false): string {
+  // .vcard-username also holds pronouns ("login · he/him"); the URL has only the login.
+  const login = location.pathname.split("/")[1] || "github";
+  return login.replace(/[^a-z0-9._-]+/gi, "-") + (readmeOnly ? "-readme" : "-resume");
 }
 
 function clone<T extends Element>(selector: string, root: ParentNode = document): T | null {
@@ -34,17 +37,11 @@ function clone<T extends Element>(selector: string, root: ParentNode = document)
   return element ? (element.cloneNode(true) as T) : null;
 }
 
-function section(title: string | null, ...content: (Node | null)[]): HTMLElement | null {
+function section(...content: (Node | null)[]): HTMLElement | null {
   const nodes = content.filter((node): node is Node => node !== null);
   if (!nodes.length) return null;
   const wrapper = document.createElement("section");
   wrapper.className = "rx-section";
-  if (title) {
-    const heading = document.createElement("h2");
-    heading.className = "rx-section-title";
-    heading.textContent = title;
-    wrapper.append(heading);
-  }
   wrapper.append(...nodes);
   return wrapper;
 }
@@ -84,7 +81,7 @@ function buildPinned(): HTMLElement | null {
   const grid = document.createElement("div");
   grid.className = "rx-pinned";
   for (const item of items) grid.append(item.cloneNode(true));
-  return section("Pinned projects", grid);
+  return section(grid);
 }
 
 function buildSidebarExtras(): HTMLElement | null {
@@ -103,20 +100,43 @@ function buildSidebarExtras(): HTMLElement | null {
     }
   }
 
-  return row.childElementCount ? section(null, row) : null;
+  return row.childElementCount ? section(row) : null;
 }
 
-export function buildResume(): HTMLElement {
+// readmeOnly keeps just the bordered README box, spanning the full sheet.
+export function buildResume(readmeOnly = false): HTMLElement {
   document.getElementById(RESUME_ID)?.remove();
 
   const resume = document.createElement("div");
   resume.id = RESUME_ID;
+  if (readmeOnly) resume.classList.add("rx-readme-only");
 
-  const readme = clone(".profile-readme article.markdown-body");
-  resume.append(
-    ...[buildHeader(), section("About", readme), buildPinned(), buildSidebarExtras()]
-      .filter((node): node is HTMLElement => node !== null),
-  );
+  // Visitors see .profile-readme; the profile owner gets a different wrapper.
+  const readme = clone(".profile-readme article.markdown-body, #user-profile-frame article.markdown-body");
+  let readmeBox: HTMLElement | null = null;
+  if (readme) {
+    readmeBox = document.createElement("div");
+    readmeBox.className = "rx-readme-box";
+    readmeBox.append(readme);
+  }
+  // README in the main column; projects and badges in a side column that
+  // wraps below the README when the page is narrow.
+  const main = document.createElement("div");
+  main.className = "rx-main";
+  const side = document.createElement("div");
+  side.className = "rx-side";
+  const body = document.createElement("div");
+  body.className = "rx-body";
+  if (readmeBox) main.append(readmeBox);
+  if (!readmeOnly) {
+    const pinned = buildPinned();
+    const extras = buildSidebarExtras();
+    if (pinned) side.append(pinned);
+    if (extras) side.append(extras);
+  }
+  body.append(...[main, side].filter((column) => column.childElementCount));
+  if (!readmeOnly) resume.append(buildHeader());
+  resume.append(body);
 
   resume.querySelectorAll(STRIP_SELECTOR).forEach((element) => element.remove());
   for (const element of [resume, ...Array.from(resume.querySelectorAll("*"))]) {
@@ -128,6 +148,36 @@ export function buildResume(): HTMLElement {
 
   document.body.append(resume);
   return resume;
+}
+
+const A4: Paper = { width: 8.27, height: 11.69 };
+const LETTER: Paper = { width: 8.5, height: 11 };
+
+// ponytail: paper follows the browser locale (Letter for US/Canada); add a
+// setting if someone needs the other size.
+export function defaultPaper(): Paper {
+  return /^en-(US|CA)$/i.test(navigator.language) ? LETTER : A4;
+}
+
+// Widens the layout until its aspect ratio matches the paper (content reflows
+// into the side column and gets shorter) and returns the print scale that
+// makes the whole resume fill exactly one page.
+export function fitToPage(resume: HTMLElement, paper: Paper): number {
+  const pageWidth = paper.width * 96;
+  const pageHeight = paper.height * 96 - 2; // keep clear of rounding into a 2nd page
+  const maxWidth = pageWidth * 2.5;
+
+  // Measure the rendered box: content with a min-content width can make the
+  // resume wider than the width we ask for.
+  const tooTall = () => resume.offsetHeight * (pageWidth / resume.offsetWidth) > pageHeight;
+  let width = pageWidth;
+  resume.style.width = width + "px";
+  while (tooTall() && width < maxWidth) {
+    width += 20;
+    resume.style.width = width + "px";
+  }
+  // ponytail: if even maxWidth is too tall, shrink further and leave side margins.
+  return Math.min(pageWidth / resume.offsetWidth, pageHeight / resume.offsetHeight);
 }
 
 export function waitForImages(root: HTMLElement, timeoutMs = 4000): Promise<void> {
