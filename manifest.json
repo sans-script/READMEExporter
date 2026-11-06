@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "README Exporter",
+  "description": "Export the GitHub README as a visually faithful PDF.",
+  "version": "0.1.0",
+  "permissions": [],
+  "host_permissions": ["https://github.com/*"],
+  "background": {
+    "service_worker": "src/background/service-worker.ts",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "README Exporter",
+    "default_popup": "src/popup/index.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*/*"],
+      "js": ["src/content/index.ts"],
+      "css": ["src/content/print.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+@media print {
+  @page {
+    size: A4;
+    margin: 8mm;
+  }
+
+  html,
+  body {
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: var(--bgColor-default, #ffffff) !important;
+    color: var(--fgColor-default, #1f2328) !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  #readme,
+  #readme * {
+    visibility: visible !important;
+  }
+
+  #readme {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 1px solid var(--borderColor-default, #d1d9e0) !important;
+    border-radius: 6px !important;
+    background: var(--bgColor-default, #ffffff) !important;
+    color: var(--fgColor-default, #1f2328) !important;
+    box-shadow: none !important;
+  }
+
+  #readme,
+  #readme * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #readme img,
+  #readme video,
+  #readme svg {
+    max-width: 100% !important;
+    break-inside: avoid;
+  }
+
+  #readme pre,
+  #readme table,
+  #readme blockquote {
+    break-inside: avoid-page;
+  }
+
+  #readme pre {
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  #readme table {
+    max-width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  #readme a {
+    color: inherit !important;
+    text-decoration: underline;
+  }
+
+  #readme .markdown-body {
+    max-width: none !important;
+    overflow: visible !important;
+  }
+
+  #readme .Box-header,
+  #readme .Box-body,
+  #readme .markdown-body {
+    break-inside: auto;
+  }
+
+  #readme [style*="position: sticky"],
+  #readme .flash,
+  #readme .js-comment-edit-button {
+    position: static !important;
+  }
+}

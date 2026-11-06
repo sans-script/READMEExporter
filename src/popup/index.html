@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>README Exporter</title>
+  </head>
+  <body>
+    <main class="popup">
+      <div class="brand">
+        <div class="brand-mark">R</div>
+        <div>
+          <h1>README Exporter</h1>
+          <p>GitHub to PDF / HTML</p>
+        </div>
+      </div>
+      <p id="status" class="status">Checking this page…</p>
+      <div class="actions">
+        <button id="export-pdf" type="button" disabled>Export as PDF</button>
+        <button id="export-html" type="button" disabled>Export as HTML</button>
+      </div>
+      <p class="hint">PDF uses Chrome's print dialog. HTML preserves the rendered README styles.</p>
+    </main>
+    <script type="module" src="./popup.ts"></script>
+  </body>
+</html>

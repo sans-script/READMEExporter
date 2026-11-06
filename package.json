@@ -1,0 +1,18 @@
+{
+  "name": "readme-exporter",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Export GitHub-rendered README pages to PDF using native Chrome printing.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.0.0-beta.32",
+    "@types/chrome": "^0.0.287",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7"
+  }
+}
