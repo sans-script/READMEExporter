@@ -13,8 +13,8 @@ A Chrome Manifest V3 extension that exports GitHub's already-rendered README to 
 
 ### From a GitHub release
 
-1. Open the [Releases page](https://github.com/sans-script/OhMyREADME.md/releases).
-2. Download the latest `OhMyREADME-vX.Y.Z.zip` asset.
+1. Open the [Releases page](https://github.com/sans-script/READMEExporter/releases).
+2. Download the latest `READMEExporter-vX.Y.Z.zip` asset.
 3. Extract the ZIP file into a folder.
 4. Open `chrome://extensions` in Chrome.
 5. Enable **Developer mode**.
@@ -42,7 +42,7 @@ git tag v0.1.1
 git push origin v0.1.1
 ```
 
-After the workflow completes, the ZIP will be available on the [Releases page](https://github.com/sans-script/OhMyREADME.md/releases).
+After the workflow completes, the ZIP will be available on the [Releases page](https://github.com/sans-script/READMEExporter/releases).
 
 ## HTML export notes
 
