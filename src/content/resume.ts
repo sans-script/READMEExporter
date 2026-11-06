@@ -138,6 +138,11 @@ export function buildResume(readmeOnly = false): HTMLElement {
   if (!readmeOnly) resume.append(buildHeader());
   resume.append(body);
 
+  return finalize(resume);
+}
+
+// Strips page chrome, un-hides responsive duplicates and mounts the document.
+function finalize(resume: HTMLElement): HTMLElement {
   resume.querySelectorAll(STRIP_SELECTOR).forEach((element) => element.remove());
   for (const element of [resume, ...Array.from(resume.querySelectorAll("*"))]) {
     for (const name of Array.from(element.classList)) {
@@ -145,9 +150,26 @@ export function buildResume(readmeOnly = false): HTMLElement {
     }
     if (element instanceof HTMLImageElement) element.loading = "eager";
   }
-
   document.body.append(resume);
   return resume;
+}
+
+// Repository README: the rendered markdown in a bordered box, printed across
+// as many pages as it needs (a long README squeezed onto one page is unreadable).
+export function buildRepoReadme(source: HTMLElement): HTMLElement {
+  document.getElementById(RESUME_ID)?.remove();
+
+  const resume = document.createElement("div");
+  resume.id = RESUME_ID;
+  resume.classList.add("rx-readme-only", "rx-paged");
+  const markdown = source.querySelector(".markdown-body") ?? source;
+  const readmeBox = document.createElement("div");
+  readmeBox.className = "rx-readme-box";
+  const article = markdown.cloneNode(true) as HTMLElement;
+  article.removeAttribute("id"); // print.css targets #readme
+  readmeBox.append(article);
+  resume.append(readmeBox);
+  return finalize(resume);
 }
 
 const A4: Paper = { width: 8.27, height: 11.69 };
@@ -178,6 +200,18 @@ export function fitToPage(resume: HTMLElement, paper: Paper): number {
   }
   // ponytail: if even maxWidth is too tall, shrink further and leave side margins.
   return Math.min(pageWidth / resume.offsetWidth, pageHeight / resume.offsetHeight);
+}
+
+// Layout width for paged READMEs: close to GitHub's README column, so text
+// prints at roughly 75% of on-screen size.
+const PAGED_WIDTH = 1000;
+export const PAGED_MARGIN_IN = 0.4;
+
+// Scale for a multi-page document: the layout keeps a fixed width and is
+// scaled to the paper's printable width; height flows onto further pages.
+export function fitToWidth(resume: HTMLElement, paper: Paper): number {
+  resume.style.width = PAGED_WIDTH + "px";
+  return ((paper.width - 2 * PAGED_MARGIN_IN) * 96) / resume.offsetWidth;
 }
 
 export function waitForImages(root: HTMLElement, timeoutMs = 4000): Promise<void> {

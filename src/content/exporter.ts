@@ -1,6 +1,16 @@
 import { findReadme, getReadmeTitle } from "./detector";
-import { buildResume, defaultPaper, fitToPage, getResumeTitle, isProfilePage, waitForImages } from "./resume";
-import type { ExtensionMessage, PdfResponse } from "../shared/types";
+import {
+  buildRepoReadme,
+  buildResume,
+  defaultPaper,
+  fitToPage,
+  fitToWidth,
+  getResumeTitle,
+  isProfilePage,
+  PAGED_MARGIN_IN,
+  waitForImages,
+} from "./resume";
+import type { ExtensionMessage, Paper, PdfResponse } from "../shared/types";
 
 let printing = false;
 
@@ -14,84 +24,74 @@ function downloadPdf(base64: string, filename: string): void {
   window.setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
 
-// Profile pages: build the resume, fit it to one page and render it to PDF
-// in the background worker (no print dialog).
+// The background worker renders the tab with DevTools Page.printToPDF.
 async function pdfStep(message: ExtensionMessage): Promise<string | undefined> {
   const response = (await chrome.runtime.sendMessage(message)) as PdfResponse;
   if (!response.ok) throw new Error(response.error);
   return response.data;
 }
 
-export async function exportProfilePdf(readmeOnly = false): Promise<void> {
+type PdfJob = {
+  build: () => HTMLElement;
+  // Returns the print scale; called while print media is emulated.
+  fit: (doc: HTMLElement, paper: Paper) => number;
+  marginIn: number;
+  filename: string;
+};
+
+async function exportPdf(job: PdfJob): Promise<void> {
   if (printing) return;
   printing = true;
 
-  const resume = buildResume(readmeOnly);
+  const doc = job.build();
   document.body.classList.add("readme-exporter-printing");
-  // print.css sets "@page { size: A4; margin: 8mm }" for README printing.
-  // Chrome lays out at the CSS page size and then shrinks it onto the paper,
-  // so the page box must match the paper exactly, with no margins.
+  // Chrome lays out at the CSS @page size, so it must match the paper exactly.
   const paper = defaultPaper();
   const pageStyle = document.createElement("style");
-  pageStyle.textContent = "@page { size: " + paper.width + "in " + paper.height + "in !important; margin: 0 !important; }";
+  pageStyle.textContent = "@page { size: " + paper.width + "in " + paper.height + "in !important; margin: " +
+    job.marginIn + "in !important; }";
   document.head.append(pageStyle);
   try {
-    await waitForImages(resume);
+    await waitForImages(doc);
     await pdfStep({ type: "PDF_BEGIN" });
-    const scale = fitToPage(resume, paper); // measured while print media is emulated
+    const scale = job.fit(doc, paper);
     const data = await pdfStep({ type: "PDF_PRINT", paper, scale });
     if (!data) throw new Error("The PDF renderer returned no data.");
-    downloadPdf(data, getResumeTitle(readmeOnly) + ".pdf");
+    downloadPdf(data, job.filename + ".pdf");
   } catch (error) {
     window.alert("PDF export failed: " + (error instanceof Error ? error.message : String(error)));
   } finally {
     await pdfStep({ type: "PDF_END" }).catch(() => undefined);
     pageStyle.remove();
     document.body.classList.remove("readme-exporter-printing");
-    resume.remove();
+    doc.remove();
     printing = false;
   }
 }
 
+// Profile: the resume (or just the profile README) on exactly one page.
+export function exportProfilePdf(readmeOnly = false): Promise<void> {
+  return exportPdf({
+    build: () => buildResume(readmeOnly),
+    fit: fitToPage,
+    marginIn: 0,
+    filename: getResumeTitle(readmeOnly),
+  });
+}
+
+// Profile → resume; repository → its README across as many pages as needed.
 export async function exportReadme(): Promise<void> {
   if (isProfilePage()) return exportProfilePdf();
-  if (printing) return;
 
   const readme = findReadme();
   if (!readme) {
     window.alert("No rendered GitHub README was found on this page.");
     return;
   }
-
-  printing = true;
-  const previousTitle = document.title;
-  const exportTitle = getReadmeTitle(readme);
-
-  document.title = exportTitle;
-
-  const restore = () => {
-    document.title = previousTitle;
-    printing = false;
-    window.removeEventListener("afterprint", restore);
-  };
-
-  window.addEventListener("afterprint", restore, { once: true });
-
-  // Let the browser finish applying the print stylesheet before opening
-  // the native print dialog.
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => window.print());
+  return exportPdf({
+    build: () => buildRepoReadme(readme),
+    fit: fitToWidth,
+    marginIn: PAGED_MARGIN_IN,
+    filename: getReadmeTitle(readme),
   });
-
-  // Some browser/platform combinations do not reliably dispatch afterprint
-  // when the print dialog is cancelled. The next visibility transition is
-  // a secondary restoration path.
-  const onVisibilityChange = () => {
-    if (document.visibilityState === "visible" && printing) {
-      restore();
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-    }
-  };
-
-  document.addEventListener("visibilitychange", onVisibilityChange);
 }

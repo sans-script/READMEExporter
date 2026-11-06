@@ -9,21 +9,18 @@ export function findReadme(): HTMLElement | null {
     if (hasRenderedContent) return candidate;
   }
 
-  // GitHub profile READMEs use a different DOM structure from repository READMEs.
-  // The profile page renders the README as an article inside .profile-readme.
-  return document.querySelector<HTMLElement>(".profile-readme article.markdown-body");
+  // Profile READMEs render inside .profile-readme; current repository pages
+  // (and markdown file views) render a bare article.markdown-body with no #readme.
+  return document.querySelector<HTMLElement>(".profile-readme article.markdown-body, article.markdown-body");
 }
 
+// "owner-repo-README" on repositories; the first heading elsewhere.
 export function getReadmeTitle(readme: HTMLElement): string {
-  const heading = readme.querySelector<HTMLElement>(
-    ".Box-header, [data-testid='readme-header'], h1",
-  );
-  const headingClone = heading?.cloneNode(true) as HTMLElement | undefined;
-  headingClone?.querySelector("#readme-exporter-controls")?.remove();
-  const headingText = headingClone?.innerText.trim();
   const repository = location.pathname.split("/").filter(Boolean).slice(0, 2).join("-");
+  if (repository.includes("-")) return sanitizeFilename(repository + "-README");
 
-  return sanitizeFilename(headingText || repository || "github-readme");
+  const heading = readme.querySelector<HTMLElement>(".Box-header, [data-testid='readme-header'], h1");
+  return sanitizeFilename(heading?.innerText.trim() || repository || "github-readme");
 }
 
 function sanitizeFilename(value: string): string {

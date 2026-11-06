@@ -30,7 +30,7 @@ function mountButtons(): void {
   const profile = isProfilePage();
   controls.append(
     createButton(PDF_BUTTON_ID, "Export PDF",
-      profile ? "Download the profile as a one-page resume PDF" : "Export using Chrome's native print dialog",
+      profile ? "Download the profile as a one-page resume PDF" : "Download this README as a PDF",
       () => void exportReadme()),
   );
   if (profile) {

@@ -1,8 +1,8 @@
 {
-  "name": "profile-exporter",
+  "name": "profile-readme-exporter",
   "private": true,
-  "version": "0.3.0",
-  "description": "Export a GitHub profile as a one-page resume PDF, or any README to PDF or HTML.",
+  "version": "0.4.0",
+  "description": "Export a GitHub profile as a one-page resume, or any README, to PDF or HTML.",
   "type": "module",
   "scripts": {
     "dev": "vite",
