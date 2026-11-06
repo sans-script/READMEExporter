@@ -126,37 +126,48 @@
   color: var(--fgColor-default, #1f2328);
 }
 
-/* Avatar | name and bio | contact links, which take as many columns as fit. */
+/* Avatar | name and bio | contact links in as many columns as fit.
+   Sizes are generous because the whole resume is zoomed down to fit the page. */
 #readme-exporter-resume .rx-header {
   display: grid;
-  grid-template-columns: 96px minmax(200px, auto) 1fr;
-  gap: 24px;
+  grid-template-columns: 168px minmax(280px, auto) 1fr;
+  gap: 36px;
   align-items: center;
+  padding-bottom: 8px;
 }
 #readme-exporter-resume .rx-avatar {
-  width: 96px;
-  height: 96px;
+  width: 168px;
+  height: 168px;
   border-radius: 50%;
   box-shadow: 0 0 0 1px var(--borderColor-default, #d1d9e0);
 }
-#readme-exporter-resume .rx-identity .user-profile-bio { margin: 6px 0 !important; }
+#readme-exporter-resume .rx-identity .vcard-fullname { font-size: 44px !important; line-height: 1.15 !important; font-weight: 600; }
+#readme-exporter-resume .rx-identity .vcard-username { font-size: 26px !important; line-height: 1.3 !important; }
+#readme-exporter-resume .rx-identity .user-profile-bio { margin: 12px 0 !important; font-size: 22px !important; }
+#readme-exporter-resume .rx-identity > div:last-child { font-size: 18px; }
+#readme-exporter-resume .rx-identity > div:last-child svg { width: 20px; height: 20px; }
 #readme-exporter-resume .rx-contact .vcard-details {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 6px 20px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px 28px;
   margin: 0;
-  padding: 0 0 0 24px;
+  padding: 4px 0 4px 36px;
   border-left: 1px solid var(--borderColor-muted, #d1d9e0b3);
 }
 #readme-exporter-resume .rx-contact .vcard-detail {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
   margin: 0 !important;
   padding: 0 !important;
   overflow: hidden;
-  font-size: 12px;
+  font-size: 17px;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+#readme-exporter-resume .rx-contact .vcard-detail svg,
+#readme-exporter-resume .rx-contact .vcard-detail img { flex: none; width: 20px; height: 20px; margin: 0 !important; }
 
 #readme-exporter-resume .rx-body {
   display: flex;
@@ -198,6 +209,10 @@
 
 #readme-exporter-resume .rx-extras { display: flex; flex-wrap: wrap; gap: 16px 40px; }
 #readme-exporter-resume .rx-extra { margin: 0 !important; padding: 0 !important; border: 0 !important; }
+
+/* README-only export: the bordered README box spans the whole sheet. */
+#readme-exporter-resume.rx-readme-only .rx-body { margin-top: 0; }
+#readme-exporter-resume.rx-readme-only article.markdown-body { max-width: none !important; }
 
 @media print {
   body.readme-exporter-printing > *:not(#readme-exporter-resume) { display: none !important; }

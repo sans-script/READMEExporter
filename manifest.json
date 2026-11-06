@@ -3,7 +3,7 @@
   "name": "README Exporter",
   "description": "Export GitHub repository and profile READMEs to visually faithful PDF or HTML files.",
   "version": "0.2.0",
-  "permissions": [],
+  "permissions": ["debugger"],
   "host_permissions": [
     "https://github.com/*"
   ],

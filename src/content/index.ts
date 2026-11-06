@@ -1,11 +1,12 @@
 import { findReadme } from "./detector";
 import { isProfilePage } from "./resume";
-import { exportReadme } from "./exporter";
+import { exportProfilePdf, exportReadme } from "./exporter";
 import { exportReadmeAsHtml } from "./html-exporter";
 import type { ExtensionMessage } from "../shared/types";
 
 const PDF_BUTTON_ID = "readme-exporter-pdf-button";
 const HTML_BUTTON_ID = "readme-exporter-html-button";
+const README_BUTTON_ID = "readme-exporter-readme-button";
 
 function createButton(id: string, label: string, title: string, action: () => void): HTMLButtonElement {
   const button = document.createElement("button");
@@ -26,8 +27,17 @@ function mountButtons(): void {
   const header = isProfilePage() ? null : readme?.querySelector<HTMLElement>(".Box-header, [data-testid='readme-header']");
   const controls = document.createElement("span");
   controls.id = "readme-exporter-controls";
+  const profile = isProfilePage();
   controls.append(
-    createButton(PDF_BUTTON_ID, "Export PDF", "Export using Chrome's native print dialog", () => void exportReadme()),
+    createButton(PDF_BUTTON_ID, "Export PDF",
+      profile ? "Download the profile as a one-page resume PDF" : "Export using Chrome's native print dialog",
+      () => void exportReadme()),
+  );
+  if (profile) {
+    controls.append(createButton(README_BUTTON_ID, "Export README",
+      "Download only the profile README as a one-page PDF", () => void exportProfilePdf(true)));
+  }
+  controls.append(
     createButton(HTML_BUTTON_ID, "Export HTML", "Download a styled HTML copy of this README", exportReadmeAsHtml),
   );
 

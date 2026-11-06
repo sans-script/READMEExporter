@@ -1,3 +1,5 @@
+import type { Paper } from "../shared/types";
+
 // Builds a resume-style document from a GitHub profile page by cloning the
 // rendered nodes (keeping GitHub's classes, icons and fonts) into a new skeleton.
 
@@ -24,10 +26,10 @@ export function isProfilePage(): boolean {
   return Boolean(document.querySelector(".js-profile-editable-area .vcard-details, .vcard-names"));
 }
 
-export function getResumeTitle(): string {
+export function getResumeTitle(readmeOnly = false): string {
   // .vcard-username also holds pronouns ("login · he/him"); the URL has only the login.
   const login = location.pathname.split("/")[1] || "github";
-  return login.replace(/[^a-z0-9._-]+/gi, "-") + "-resume";
+  return login.replace(/[^a-z0-9._-]+/gi, "-") + (readmeOnly ? "-readme" : "-resume");
 }
 
 function clone<T extends Element>(selector: string, root: ParentNode = document): T | null {
@@ -101,11 +103,13 @@ function buildSidebarExtras(): HTMLElement | null {
   return row.childElementCount ? section(row) : null;
 }
 
-export function buildResume(): HTMLElement {
+// readmeOnly keeps just the bordered README box, spanning the full sheet.
+export function buildResume(readmeOnly = false): HTMLElement {
   document.getElementById(RESUME_ID)?.remove();
 
   const resume = document.createElement("div");
   resume.id = RESUME_ID;
+  if (readmeOnly) resume.classList.add("rx-readme-only");
 
   // Visitors see .profile-readme; the profile owner gets a different wrapper.
   const readme = clone(".profile-readme article.markdown-body, #user-profile-frame article.markdown-body");
@@ -123,13 +127,16 @@ export function buildResume(): HTMLElement {
   side.className = "rx-side";
   const body = document.createElement("div");
   body.className = "rx-body";
-  const pinned = buildPinned();
-  const extras = buildSidebarExtras();
   if (readmeBox) main.append(readmeBox);
-  if (pinned) side.append(pinned);
-  if (extras) side.append(extras);
+  if (!readmeOnly) {
+    const pinned = buildPinned();
+    const extras = buildSidebarExtras();
+    if (pinned) side.append(pinned);
+    if (extras) side.append(extras);
+  }
   body.append(...[main, side].filter((column) => column.childElementCount));
-  resume.append(buildHeader(), body);
+  if (!readmeOnly) resume.append(buildHeader());
+  resume.append(body);
 
   resume.querySelectorAll(STRIP_SELECTOR).forEach((element) => element.remove());
   for (const element of [resume, ...Array.from(resume.querySelectorAll("*"))]) {
@@ -143,28 +150,34 @@ export function buildResume(): HTMLElement {
   return resume;
 }
 
-// A4 at 96dpi. Printers like "Microsoft Print to PDF" ignore custom @page
-// sizes, so instead of growing the page we shrink the resume to fit A4.
-const PAGE_WIDTH = 794;
-const PAGE_HEIGHT = 1110; // a little under 1123 to absorb printer rounding
-const MAX_WIDTH = PAGE_WIDTH * 2.5;
+const A4: Paper = { width: 8.27, height: 11.69 };
+const LETTER: Paper = { width: 8.5, height: 11 };
 
-// Widens the layout until its aspect ratio fits A4 (content reflows into
-// more columns and gets shorter), then zooms it down to the page width.
-// Returns a cleanup that restores the page.
-export function fitToSinglePage(resume: HTMLElement): () => void {
-  let width = PAGE_WIDTH;
+// ponytail: paper follows the browser locale (Letter for US/Canada); add a
+// setting if someone needs the other size.
+export function defaultPaper(): Paper {
+  return /^en-(US|CA)$/i.test(navigator.language) ? LETTER : A4;
+}
+
+// Widens the layout until its aspect ratio matches the paper (content reflows
+// into the side column and gets shorter), then zooms it down so the whole
+// resume fills exactly one page. Returns a cleanup that restores the page.
+export function fitToPage(resume: HTMLElement, paper: Paper): () => void {
+  const pageWidth = paper.width * 96;
+  const pageHeight = paper.height * 96 - 2; // keep clear of rounding into a 2nd page
+  const maxWidth = pageWidth * 2.5;
+
+  let width = pageWidth;
   resume.style.width = width + "px";
-  while (resume.offsetHeight * (PAGE_WIDTH / width) > PAGE_HEIGHT && width < MAX_WIDTH) {
-    width += 40;
+  while (resume.offsetHeight * (pageWidth / width) > pageHeight && width < maxWidth) {
+    width += 20;
     resume.style.width = width + "px";
   }
-  // ponytail: if even MAX_WIDTH is too tall, shrink further and leave side margins.
-  const zoom = Math.min(PAGE_WIDTH / width, PAGE_HEIGHT / resume.offsetHeight);
+  // ponytail: if even maxWidth is too tall, shrink further and leave side margins.
+  const zoom = Math.min(pageWidth / width, pageHeight / resume.offsetHeight);
 
   const style = document.createElement("style");
-  style.textContent = "@page { size: A4; margin: 0; } " +
-    "@media print { #" + RESUME_ID + " { zoom: " + zoom.toFixed(4) + "; } }";
+  style.textContent = "@page { margin: 0; } @media print { #" + RESUME_ID + " { zoom: " + zoom.toFixed(4) + "; } }";
   document.head.append(style);
   return () => style.remove();
 }
