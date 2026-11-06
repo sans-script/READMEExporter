@@ -1,4 +1,5 @@
 import { findReadme } from "./detector";
+import { isProfilePage } from "./resume";
 import { exportReadme } from "./exporter";
 import { exportReadmeAsHtml } from "./html-exporter";
 import type { ExtensionMessage } from "../shared/types";
@@ -16,15 +17,17 @@ function createButton(id: string, label: string, title: string, action: () => vo
   return button;
 }
 
+const canExport = (): boolean => isProfilePage() || Boolean(findReadme());
+
 function mountButtons(): void {
   const readme = findReadme();
-  if (!readme || document.getElementById(PDF_BUTTON_ID)) return;
+  if (!canExport() || document.getElementById(PDF_BUTTON_ID)) return;
 
-  const header = readme.querySelector<HTMLElement>(".Box-header, [data-testid='readme-header']");
+  const header = isProfilePage() ? null : readme?.querySelector<HTMLElement>(".Box-header, [data-testid='readme-header']");
   const controls = document.createElement("span");
   controls.id = "readme-exporter-controls";
   controls.append(
-    createButton(PDF_BUTTON_ID, "Export PDF", "Export using Chrome's native print dialog", exportReadme),
+    createButton(PDF_BUTTON_ID, "Export PDF", "Export using Chrome's native print dialog", () => void exportReadme()),
     createButton(HTML_BUTTON_ID, "Export HTML", "Download a styled HTML copy of this README", exportReadmeAsHtml),
   );
 
@@ -78,19 +81,19 @@ observer.observe(document.documentElement, { childList: true, subtree: true });
 chrome.runtime.onMessage.addListener(
   (message: ExtensionMessage, _sender, sendResponse) => {
     if (message.type === "README_EXPORT_STATUS") {
-      sendResponse({ available: Boolean(findReadme()), title: document.title });
+      sendResponse({ available: canExport(), profile: isProfilePage(), title: document.title });
       return false;
     }
 
     if (message.type === "EXPORT_README_PDF") {
-      const available = Boolean(findReadme());
-      if (available) exportReadme();
+      const available = canExport();
+      if (available) void exportReadme();
       sendResponse({ available });
       return false;
     }
 
     if (message.type === "EXPORT_README_HTML") {
-      const available = Boolean(findReadme());
+      const available = canExport();
       if (available) exportReadmeAsHtml();
       sendResponse({ available });
       return false;
